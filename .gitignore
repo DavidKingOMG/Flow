@@ -1,1 +1,4 @@
 worktrees/
+.next/
+node_modules/
+*.tsbuildinfo
