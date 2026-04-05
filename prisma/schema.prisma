@@ -25,6 +25,11 @@ enum UserStatus {
   DISABLED
 }
 
+enum ClientStatus {
+  ACTIVE
+  INACTIVE
+}
+
 model Business {
   id          String            @id @default(cuid())
   name        String
@@ -36,6 +41,7 @@ model Business {
   roles       Role[]
   users       User[]            @relation("BusinessUsers")
   activeUsers User[]            @relation("UserActiveBusiness")
+  clients     Client[]
 }
 
 model BusinessSettings {
@@ -87,11 +93,36 @@ model User {
   role             Role       @relation(fields: [businessId, roleId], references: [businessId, id], onDelete: Restrict)
   accounts         Account[]
   sessions         Session[]
+  clientProfile    Client?
 
   @@index([businessId])
   @@index([activeBusinessId])
   @@index([roleId])
   @@index([businessId, roleId])
+  @@unique([businessId, id])
+}
+
+model Client {
+  id          String       @id @default(cuid())
+  businessId  String
+  userId      String?
+  status      ClientStatus @default(ACTIVE)
+  fullName    String
+  companyName String?
+  email       String
+  phone       String
+  username    String?
+  notes       String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  business    Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  user        User?        @relation(fields: [businessId, userId], references: [businessId, id], onDelete: Restrict)
+
+  @@index([businessId])
+  @@unique([businessId, email])
+  @@unique([businessId, phone])
+  @@unique([businessId, username])
+  @@unique([businessId, userId])
 }
 
 model Account {
