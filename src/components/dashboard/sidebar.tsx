@@ -12,8 +12,8 @@ type SidebarNavigationItem =
 
 const primaryNavigation: SidebarNavigationItem[] = [
   { label: "Dashboard", href: "/dashboard", active: true, available: true },
-  { label: "Clients", active: false, available: false },
-  { label: "Invoices", active: false, available: false },
+  { label: "Clients", href: "/clients", active: false, available: true },
+  { label: "Invoices", href: "/invoices", active: false, available: true },
   { label: "Payments", active: false, available: false },
 ];
 

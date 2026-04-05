@@ -30,6 +30,15 @@ enum ClientStatus {
   INACTIVE
 }
 
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PARTIAL
+  PAID
+  OVERDUE
+  CANCELED
+}
+
 model Business {
   id          String            @id @default(cuid())
   name        String
@@ -42,6 +51,7 @@ model Business {
   users       User[]            @relation("BusinessUsers")
   activeUsers User[]            @relation("UserActiveBusiness")
   clients     Client[]
+  invoices    Invoice[]
 }
 
 model BusinessSettings {
@@ -50,6 +60,7 @@ model BusinessSettings {
   currencyCode String   @default("USD") @db.VarChar(3)
   timezone     String   @default("America/New_York")
   locale       String   @default("en-US")
+  nextInvoiceNumber Int @default(1)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   business     Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
@@ -117,12 +128,54 @@ model Client {
   updatedAt   DateTime     @updatedAt
   business    Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
   user        User?        @relation(fields: [businessId, userId], references: [businessId, id], onDelete: Restrict)
+  invoices    Invoice[]
 
   @@index([businessId])
   @@unique([businessId, email])
   @@unique([businessId, phone])
   @@unique([businessId, username])
   @@unique([businessId, userId])
+  @@unique([businessId, id])
+}
+
+model Invoice {
+  id            String        @id @default(cuid())
+  businessId    String
+  clientId      String
+  invoiceNumber String
+  status        InvoiceStatus @default(DRAFT)
+  issuedAt      DateTime
+  dueAt         DateTime
+  subtotal      Int
+  tax           Int           @default(0)
+  total         Int
+  paidAmount    Int           @default(0)
+  taxRateBps    Int           @default(0)
+  notes         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  business      Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  client        Client        @relation(fields: [businessId, clientId], references: [businessId, id], onDelete: Restrict)
+  lineItems     InvoiceLineItem[]
+
+  @@unique([businessId, invoiceNumber])
+  @@index([businessId, clientId])
+  @@index([businessId, status, dueAt])
+}
+
+model InvoiceLineItem {
+  id          String   @id @default(cuid())
+  invoiceId   String
+  description String
+  quantity    Int
+  unitPrice   Int
+  lineTotal   Int
+  sortOrder   Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId, sortOrder])
 }
 
 model Account {
