@@ -10,6 +10,13 @@
   --muted: 215 20% 68%;
   --accent: 190 100% 55%;
   --accent-soft: 190 100% 55% / 0.14;
+  --dashboard-panel: 224 41% 11%;
+  --dashboard-panel-strong: 223 44% 8%;
+  --dashboard-border: 220 30% 18%;
+  --dashboard-muted: 214 18% 70%;
+  --dashboard-accent: 190 100% 64%;
+  --dashboard-success: 158 70% 57%;
+  --dashboard-warning: 40 92% 62%;
 }
 
 html {
