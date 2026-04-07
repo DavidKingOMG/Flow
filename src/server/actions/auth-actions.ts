@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { z } from "zod";
 import { db } from "@/lib/db";
+import { writeActivityLog } from "@/lib/activity-log";
 import { hashPassword } from "@/lib/password";
 
 const businessSignupSchema = z.object({
@@ -112,6 +113,25 @@ export async function createBusinessAccount(rawInput: BusinessSignupInput) {
           currencyCode,
           timezone,
         },
+      });
+
+      await transaction.activityLog?.createMany?.({
+        data: [
+          {
+            businessId: business.id,
+            actorUserId: user.id,
+            type: "BUSINESS_CREATED",
+            title: "Business workspace created",
+            message: `${business.name} is now active with its first admin account.`,
+          },
+          {
+            businessId: business.id,
+            actorUserId: user.id,
+            type: "USER_CREATED",
+            title: "Initial admin provisioned",
+            message: `${user.fullName} was created as the initial admin user.`,
+          },
+        ],
       });
 
       return {

@@ -251,7 +251,7 @@ describe("authorizeCredentials", () => {
 });
 
 describe("getEnv", () => {
-  it("only requires database and auth environment variables for Task 2", async () => {
+  it("requires database, auth, and Stripe environment variables", async () => {
     const originalEnv = { ...process.env };
 
     vi.resetModules();
@@ -260,6 +260,9 @@ describe("getEnv", () => {
       DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/flow",
       AUTH_SECRET: "test-secret",
       AUTH_URL: "http://localhost:3000",
+      STRIPE_SECRET_KEY: "sk_test_replace_me",
+      STRIPE_WEBHOOK_SECRET: "whsec_replace_me",
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: "pk_test_replace_me",
     };
 
     const { getEnv } = await import("@/lib/env");
@@ -268,6 +271,9 @@ describe("getEnv", () => {
       DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/flow",
       AUTH_SECRET: "test-secret",
       AUTH_URL: "http://localhost:3000",
+      STRIPE_SECRET_KEY: "sk_test_replace_me",
+      STRIPE_WEBHOOK_SECRET: "whsec_replace_me",
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: "pk_test_replace_me",
     });
 
     process.env = originalEnv;

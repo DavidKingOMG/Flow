@@ -2,6 +2,7 @@
 
 import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { writeActivityLog } from "@/lib/activity-log";
 import { db } from "@/lib/db";
 import { assertBusinessAccess, requireActiveBusiness, type ActiveBusinessContext } from "@/lib/business-context";
 import { hashPassword } from "@/lib/password";

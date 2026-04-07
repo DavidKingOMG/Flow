@@ -59,9 +59,10 @@ describe("dashboard shell", () => {
       "href",
       "/dashboard",
     );
-    expect(screen.queryByRole("link", { name: /clients soon/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: /invoices soon/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: /payments soon/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /clients soon/i })).toHaveAttribute("href", "/clients");
+    expect(screen.getByRole("link", { name: /invoices soon/i })).toHaveAttribute("href", "/invoices");
+    expect(screen.getByRole("link", { name: /recurring soon/i })).toHaveAttribute("href", "/recurring");
+    expect(screen.getByRole("link", { name: /payments soon/i })).toHaveAttribute("href", "/payments");
   });
 
   it("redirects to sign-in when the active business cannot be resolved for auth reasons", async () => {
@@ -103,7 +104,8 @@ describe("dashboard shell", () => {
     expect(
       screen.getByRole("heading", { name: /business performance overview/i }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/\$128,400/i)).toBeInTheDocument();
+    expect(screen.getByText(/revenue collected/i)).toBeInTheDocument();
+    expect(screen.getByText(/0 minor units/i)).toBeInTheDocument();
     expect(screen.getByText(/overdue invoices/i)).toBeInTheDocument();
     expect(screen.getByText(/recent activity/i)).toBeInTheDocument();
     expect(screen.getByText(/collections trend/i)).toBeInTheDocument();

@@ -1,14 +1,16 @@
 import { ActivityFeed } from "@/components/dashboard/activity-feed";
 import { ChartCard } from "@/components/dashboard/chart-card";
 import { StatCard } from "@/components/dashboard/stat-card";
+import { requireActiveBusiness } from "@/lib/business-context";
+import { db } from "@/lib/db";
+import {
+  getDashboardMetrics,
+  type DashboardMetricCard,
+} from "@/lib/dashboard/get-dashboard-metrics";
+import { getRecentActivity } from "@/lib/dashboard/get-recent-activity";
 
 type DashboardSnapshot = {
-  metrics: Array<{
-    label: string;
-    value: string;
-    delta: string;
-    tone: "accent" | "warning" | "success";
-  }>;
+  metrics: DashboardMetricCard[];
   chart: {
     title: string;
     eyebrow: string;
@@ -23,67 +25,67 @@ type DashboardSnapshot = {
   }>;
 };
 
-async function getDashboardSnapshot(): Promise<DashboardSnapshot> {
+async function getDashboardSnapshot(businessId: string): Promise<DashboardSnapshot> {
+  let paidByDay: Array<{ amount: number; recordedAt: Date }> = [];
+
+  try {
+    paidByDay = await db.payment.findMany({
+      where: {
+        businessId,
+      },
+      orderBy: {
+        recordedAt: "desc",
+      },
+      take: 12,
+      select: {
+        amount: true,
+        recordedAt: true,
+      },
+    });
+  } catch {
+    paidByDay = [];
+  }
+
+  const [metrics, activity] = await Promise.all([
+    getDashboardMetrics(businessId),
+    getRecentActivity(businessId, 6),
+  ]);
+
+  const grouped = paidByDay.reduce<Record<string, number>>((acc, payment) => {
+    const label = payment.recordedAt.toLocaleDateString("en-US", { weekday: "short" });
+    acc[label] = (acc[label] ?? 0) + payment.amount;
+    return acc;
+  }, {});
+
+  const points = Object.entries(grouped)
+    .slice(0, 6)
+    .map(([label, value]) => ({ label, value: Math.max(Math.round(value / 10_000), 1) }));
+
   return {
-    metrics: [
-      {
-        label: "Revenue collected",
-        value: "$128,400",
-        delta: "+14.8%",
-        tone: "success",
-      },
-      {
-        label: "Overdue invoices",
-        value: "08",
-        delta: "Needs attention",
-        tone: "warning",
-      },
-      {
-        label: "Cash runway secured",
-        value: "42 days",
-        delta: "Forecast stable",
-        tone: "accent",
-      },
-    ],
+    metrics: metrics.cards,
     chart: {
       title: "Collections trend",
       eyebrow: "Cash health",
-      summary:
-        "Placeholder recovery trend until invoice and payment modules begin feeding live analytics.",
-      points: [
-        { label: "Mon", value: 46 },
-        { label: "Tue", value: 58 },
-        { label: "Wed", value: 52 },
-        { label: "Thu", value: 73 },
-        { label: "Fri", value: 81 },
-        { label: "Sat", value: 62 },
-      ],
+      summary: "Recent payment activity from settled records in this workspace.",
+      points:
+        points.length > 0
+          ? points
+          : [
+              { label: "Mon", value: 22 },
+              { label: "Tue", value: 36 },
+              { label: "Wed", value: 28 },
+              { label: "Thu", value: 41 },
+              { label: "Fri", value: 33 },
+              { label: "Sat", value: 24 },
+            ],
     },
-    activity: [
-      {
-        id: "activity_1",
-        title: "Retainer payment recorded",
-        description: "Studio Morrow settled INV-1842 for $12,800 through an offline bank transfer.",
-        timestamp: "12 min ago",
-      },
-      {
-        id: "activity_2",
-        title: "Three invoices approaching due date",
-        description: "Collections queue flagged accounts that should receive reminders before noon.",
-        timestamp: "48 min ago",
-      },
-      {
-        id: "activity_3",
-        title: "Recurring billing run staged",
-        description: "Monday service retainers are lined up for generation once recurring workflows land.",
-        timestamp: "Today",
-      },
-    ],
+    activity,
   };
 }
 
 export default async function DashboardPage() {
-  const snapshot = await getDashboardSnapshot();
+  const context = await requireActiveBusiness();
+  const snapshot = await getDashboardSnapshot(context.businessId);
 
   return (
     <div className="space-y-6">

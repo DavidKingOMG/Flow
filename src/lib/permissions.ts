@@ -24,3 +24,7 @@ export function canManageBusiness(role: AppRole): boolean {
 export function canManageBilling(role: AppRole): boolean {
   return hasMinimumRole(role, "MANAGER");
 }
+
+export function canViewClientPortalInvoice(role: AppRole): boolean {
+  return role === "CLIENT" || hasMinimumRole(role, "STAFF");
+}

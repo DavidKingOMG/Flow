@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { writeActivityLog } from "@/lib/activity-log";
 import { assertBusinessAccess, requireActiveBusiness, type ActiveBusinessContext } from "@/lib/business-context";
 import { db } from "@/lib/db";
 import { assertBillingAccess, BillingAccessError } from "@/lib/invoices/authorization";
@@ -27,6 +28,11 @@ export type InvoiceFormLineItemValue = {
   description: string;
   quantity: string;
   unitPrice: string;
+};
+
+type RecurringInvoiceMetadata = {
+  recurringTemplateId?: string | null;
+  recurringWindowStart?: Date | null;
 };
 
 export type CreateInvoiceFormState = {
@@ -63,6 +69,13 @@ class InvoiceClientNotFoundError extends Error {
   constructor() {
     super("Choose an active client that belongs to your active business.");
     this.name = "InvoiceClientNotFoundError";
+  }
+}
+
+class InvoiceRecurringTemplateAccessError extends Error {
+  constructor() {
+    super("Recurring template links must belong to the same business and client as the invoice.");
+    this.name = "InvoiceRecurringTemplateAccessError";
   }
 }
 
@@ -156,6 +169,31 @@ async function assertClientBelongsToBusiness(businessId: string, clientId: strin
   }
 }
 
+async function assertRecurringTemplateBelongsToInvoice(
+  businessId: string,
+  clientId: string,
+  recurringTemplateId: string | null | undefined,
+) {
+  if (!recurringTemplateId) {
+    return;
+  }
+
+  const template = await db.recurringInvoiceTemplate.findFirst({
+    where: {
+      id: recurringTemplateId,
+      businessId,
+      clientId,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (!template) {
+    throw new InvoiceRecurringTemplateAccessError();
+  }
+}
+
 function createClientNotFoundState(values: CreateInvoiceFormState["values"]): CreateInvoiceFormState {
   return {
     status: "error",
@@ -169,7 +207,7 @@ function createClientNotFoundState(values: CreateInvoiceFormState["values"]): Cr
 
 export async function createInvoiceForBusiness(
   context: Pick<ActiveBusinessContext, "businessId" | "activeBusinessId" | "userId" | "role">,
-  rawInput: CreateInvoiceInput | CreateInvoiceData,
+  rawInput: (CreateInvoiceInput | CreateInvoiceData) & RecurringInvoiceMetadata,
 ) {
   assertBillingAccess(context);
   assertBusinessAccess({
@@ -178,6 +216,10 @@ export async function createInvoiceForBusiness(
   });
 
   let parsed: CreateInvoiceData;
+  const recurringMetadata: RecurringInvoiceMetadata = {
+    recurringTemplateId: rawInput.recurringTemplateId ?? null,
+    recurringWindowStart: rawInput.recurringWindowStart ?? null,
+  };
 
   if (rawInput.issuedAt instanceof Date && rawInput.dueAt instanceof Date) {
     parsed = rawInput as CreateInvoiceData;
@@ -187,6 +229,11 @@ export async function createInvoiceForBusiness(
   const input = normalizeInvoiceData(parsed);
 
   await assertClientBelongsToBusiness(context.businessId, input.clientId);
+  await assertRecurringTemplateBelongsToInvoice(
+    context.businessId,
+    input.clientId,
+    recurringMetadata.recurringTemplateId,
+  );
 
   const totals = calculateInvoiceTotals({
     items: input.lineItems,
@@ -223,6 +270,8 @@ export async function createInvoiceForBusiness(
       data: {
         businessId: context.businessId,
         clientId: input.clientId,
+        recurringTemplateId: recurringMetadata.recurringTemplateId,
+        recurringWindowStart: recurringMetadata.recurringWindowStart,
         invoiceNumber,
         status,
         issuedAt: input.issuedAt,

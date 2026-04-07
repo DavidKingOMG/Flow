@@ -4,6 +4,7 @@ const invoiceState = vi.hoisted(() => {
   const requireActiveBusiness = vi.fn();
   const businessSettingsUpdate = vi.fn();
   const clientFindFirst = vi.fn();
+  const recurringTemplateFindFirst = vi.fn();
   const invoiceCreate = vi.fn();
   const transaction = vi.fn();
 
@@ -11,6 +12,7 @@ const invoiceState = vi.hoisted(() => {
     requireActiveBusiness,
     businessSettingsUpdate,
     clientFindFirst,
+    recurringTemplateFindFirst,
     invoiceCreate,
     transaction,
   };
@@ -26,6 +28,9 @@ vi.mock("@/lib/db", () => ({
     client: {
       findFirst: invoiceState.clientFindFirst,
     },
+    recurringInvoiceTemplate: {
+      findFirst: invoiceState.recurringTemplateFindFirst,
+    },
     $transaction: invoiceState.transaction,
   },
 }));
@@ -35,6 +40,7 @@ vi.mock("next/cache", () => ({
 }));
 
 import {
+  createInvoiceForBusiness,
   createInvoiceAction,
   initialCreateInvoiceFormState,
 } from "@/server/actions/invoice-actions";
@@ -44,6 +50,7 @@ describe("createInvoiceAction", () => {
     invoiceState.requireActiveBusiness.mockReset();
     invoiceState.businessSettingsUpdate.mockReset();
     invoiceState.clientFindFirst.mockReset();
+    invoiceState.recurringTemplateFindFirst.mockReset();
     invoiceState.invoiceCreate.mockReset();
     invoiceState.transaction.mockReset();
 
@@ -57,6 +64,11 @@ describe("createInvoiceAction", () => {
       id: "client_123",
       businessId: "business_123",
       fullName: "Northwind Studio",
+    });
+    invoiceState.recurringTemplateFindFirst.mockResolvedValue({
+      id: "template_123",
+      businessId: "business_123",
+      clientId: "client_123",
     });
     invoiceState.businessSettingsUpdate.mockResolvedValue({
       id: "settings_123",
@@ -245,5 +257,42 @@ describe("createInvoiceAction", () => {
     expect(invoiceState.transaction).not.toHaveBeenCalled();
     expect(result.status).toBe("error");
     expect(result.message).toMatch(/manager/i);
+  });
+
+  it("rejects recurring template links from another business before the invoice transaction opens", async () => {
+    invoiceState.recurringTemplateFindFirst.mockResolvedValueOnce(null);
+
+    await expect(
+      createInvoiceForBusiness(
+        {
+          userId: "user_admin_123",
+          businessId: "business_123",
+          activeBusinessId: "business_123",
+          role: "ADMIN",
+        },
+        {
+          clientId: "client_123",
+          issuedAt: new Date(2026, 3, 4, 12, 0, 0, 0),
+          dueAt: new Date(2026, 3, 18, 12, 0, 0, 0),
+          status: "SENT",
+          taxRateBps: 0,
+          lineItems: [{ description: "Monthly retainer", quantity: 1, unitPrice: 15000 }],
+          recurringTemplateId: "template_other_business",
+          recurringWindowStart: new Date(2026, 3, 4, 12, 0, 0, 0),
+        },
+      ),
+    ).rejects.toThrow(/same business/i);
+
+    expect(invoiceState.recurringTemplateFindFirst).toHaveBeenCalledWith({
+      where: {
+        id: "template_other_business",
+        businessId: "business_123",
+        clientId: "client_123",
+      },
+      select: {
+        id: true,
+      },
+    });
+    expect(invoiceState.transaction).not.toHaveBeenCalled();
   });
 });

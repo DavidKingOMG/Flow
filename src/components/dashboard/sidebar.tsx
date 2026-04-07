@@ -14,11 +14,11 @@ const primaryNavigation: SidebarNavigationItem[] = [
   { label: "Dashboard", href: "/dashboard", active: true, available: true },
   { label: "Clients", href: "/clients", active: false, available: true },
   { label: "Invoices", href: "/invoices", active: false, available: true },
-  { label: "Payments", active: false, available: false },
+  { label: "Recurring", href: "/recurring", active: false, available: true },
+  { label: "Payments", href: "/payments", active: false, available: true },
 ];
 
 const secondaryNavigation = [
-  "Recurring billing",
   "Team permissions",
   "Settings",
 ];
