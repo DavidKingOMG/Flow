@@ -3,10 +3,20 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { db } from "@/lib/db";
 import { authorizeCredentials } from "@/lib/auth-authorize";
-import { getEnv } from "@/lib/env";
 import { isAppRole, type AppRole } from "@/lib/permissions";
 
-const env = getEnv();
+function resolveAuthSecret(): string | undefined {
+  if (process.env.AUTH_SECRET) {
+    return process.env.AUTH_SECRET;
+  }
+
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("AUTH_SECRET is required in production.");
+  }
+
+  // Local fallback keeps preview/dev routes working without full env wiring.
+  return "flow-dev-auth-secret";
+}
 type AuthUserContext = {
   businessId: string;
   activeBusinessId: string;
@@ -15,7 +25,7 @@ type AuthUserContext = {
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(db),
-  secret: env.AUTH_SECRET,
+  secret: resolveAuthSecret(),
   session: {
     strategy: "jwt",
   },

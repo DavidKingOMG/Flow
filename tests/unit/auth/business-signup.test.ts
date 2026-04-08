@@ -296,7 +296,7 @@ describe("auth foundations", () => {
     expect(routeModule.POST).toBe("post-handler");
   });
 
-  it("does not redirect sign-in flows to the future dashboard route", async () => {
+  it("redirects sign-up and sign-in flows to the dashboard", async () => {
     const signInMock = vi.fn().mockResolvedValue(undefined);
 
     vi.doMock("@/lib/auth", () => ({
@@ -323,7 +323,7 @@ describe("auth foundations", () => {
       1,
       "credentials",
       expect.objectContaining({
-        redirectTo: "/",
+        redirectTo: "/dashboard",
       }),
     );
 
@@ -331,7 +331,7 @@ describe("auth foundations", () => {
       2,
       "credentials",
       expect.objectContaining({
-        redirectTo: "/",
+        redirectTo: "/dashboard",
       }),
     );
   });

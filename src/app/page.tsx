@@ -39,13 +39,13 @@ export default function HomePage() {
 
             <div className="mt-10 flex flex-wrap gap-4">
               <a
-                href="#dashboard-preview"
+                href="/sign-up"
                 className="rounded-full bg-cyan-300 px-6 py-3 text-sm font-medium text-slate-950 shadow-glow transition hover:bg-cyan-200"
               >
                 Explore Flow
               </a>
               <a
-                href="#dashboard-preview"
+                href="/dashboard"
                 className="rounded-full border border-white/15 bg-white/5 px-6 py-3 text-sm font-medium text-white transition hover:border-white/25 hover:bg-white/10"
               >
                 See the dashboard

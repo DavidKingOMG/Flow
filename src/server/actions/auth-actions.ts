@@ -162,31 +162,64 @@ export async function createBusinessAccountAction(formData: FormData) {
     phone: readFormDataEntry(formData, "phone"),
   };
 
-  const result = await createBusinessAccount(input);
+  const parsed = businessSignupSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: parsed.error.issues[0]?.message ?? "Please correct the highlighted fields.",
+    };
+  }
+
+  let result;
+
+  try {
+    result = await createBusinessAccount(parsed.data);
+  } catch (error) {
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : "Unable to create your business account.",
+    };
+  }
 
   try {
     const { signIn } = await import("@/lib/auth");
 
     await signIn("credentials", {
       identifier: result.user.email,
-      password: input.password,
-      redirectTo: "/",
+      password: parsed.data.password,
+      redirectTo: "/dashboard",
     });
   } catch (error) {
     rethrowRedirect(error);
+
+    return {
+      ok: false,
+      error: "Your account was created, but automatic sign-in failed. Please sign in manually.",
+    };
   }
+
+  return { ok: true };
 }
 
 export async function signInWithCredentialsAction(formData: FormData) {
-  const credentials = credentialActionSchema.parse({
+  const parsed = credentialActionSchema.safeParse({
     identifier: readFormDataEntry(formData, "identifier"),
     password: readFormDataEntry(formData, "password"),
   });
 
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: parsed.error.issues[0]?.message ?? "Please provide valid sign-in credentials.",
+    };
+  }
+
   const { signIn } = await import("@/lib/auth");
 
   await signIn("credentials", {
-    ...credentials,
-    redirectTo: "/",
+    ...parsed.data,
+    redirectTo: "/dashboard",
   });
+
+  return { ok: true };
 }

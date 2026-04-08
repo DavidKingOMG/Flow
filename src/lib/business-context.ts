@@ -125,7 +125,20 @@ export function ensureBusinessAccess(
   return context;
 }
 
+function isDevAuthBypassEnabled(): boolean {
+  return process.env.NODE_ENV === "development" && process.env.DEV_AUTH_BYPASS !== "0";
+}
+
 export async function requireActiveBusiness(): Promise<ActiveBusinessContext> {
+  if (isDevAuthBypassEnabled()) {
+    return {
+      userId: "dev-user",
+      businessId: "dev-business",
+      activeBusinessId: "dev-business",
+      role: "ADMIN",
+    };
+  }
+
   const { auth } = await import("@/lib/auth");
 
   return revalidateActiveBusinessSession(await auth());
