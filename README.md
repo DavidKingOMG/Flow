@@ -26,6 +26,8 @@ Flow is a secure, admin-first business dashboard for multi-client operations:
 - E2E tests: `npm run test:e2e`
 - Lint: `npm run lint`
 - Release verification: `npm run verify`
+- Pre-deploy env validation: `npm run deploy:check-env`
+- Full deployment gate: `npm run deploy:ready`
 - Health check: `GET /api/health`
 
 ## CI

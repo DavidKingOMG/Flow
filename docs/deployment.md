@@ -29,10 +29,10 @@ Recommended target: Vercel.
 
 1. Import repository in Vercel.
 2. Configure all environment variables above.
-3. Use default install command (`npm install`).
-4. Use build command:
-   - `npm run build`
-5. Deploy.
+3. Confirm project uses repository config from `vercel.json`.
+4. Use install command: `npm ci`
+5. Use build command: `npm run build`
+6. Deploy.
 
 `npm run build` already runs `prisma generate` first.
 
@@ -48,10 +48,11 @@ Create webhook endpoint in Stripe:
 
 Run before shipping:
 
-1. `npm run verify`
-2. `npm run test:e2e`
-3. `npm run db:migrate:deploy` (production environment)
-4. Verify sign-up/sign-in, invoice creation, and payment status updates in live app.
+1. `npm run deploy:check-env`
+2. `npm run verify`
+3. `npm run test:e2e`
+4. `npm run db:migrate:deploy` (production environment)
+5. Verify sign-up/sign-in, invoice creation, and payment status updates in live app.
 
 ## 6. Operational Health Check
 

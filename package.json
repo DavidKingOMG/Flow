@@ -10,6 +10,8 @@
     "test:e2e": "playwright test",
     "lint": "next lint",
     "verify": "npm run lint && npm test && npm run build",
+    "deploy:check-env": "node scripts/check-production-env.mjs",
+    "deploy:ready": "npm run verify && npm run deploy:check-env",
     "db:generate": "prisma generate",
     "db:migrate:dev": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
