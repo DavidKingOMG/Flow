@@ -4,7 +4,6 @@ import { Prisma } from "@prisma/client";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { writeActivityLog } from "@/lib/activity-log";
 import { hashPassword } from "@/lib/password";
 
 const businessSignupSchema = z.object({

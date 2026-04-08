@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { writeActivityLog } from "@/lib/activity-log";
 import { assertBusinessAccess, requireActiveBusiness, type ActiveBusinessContext } from "@/lib/business-context";
 import { db } from "@/lib/db";
 import { assertBillingAccess, BillingAccessError } from "@/lib/invoices/authorization";
