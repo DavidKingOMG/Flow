@@ -53,3 +53,14 @@ Run before shipping:
 3. `npm run test:e2e`
 4. `npm run db:migrate:deploy` (production environment)
 5. Verify sign-up/sign-in, invoice creation, and payment status updates in live app.
+
+## 6. Operational Health Check
+
+Flow exposes a readiness endpoint:
+
+- `GET /api/health`
+
+Expected responses:
+
+- `200` with `{ ok: true }` when DB connectivity is healthy
+- `503` with `{ ok: false }` when DB connectivity fails

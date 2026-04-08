@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useActionState, useEffect, useRef, useState } from "react";
+import { initialCreateRecurringTemplateFormState } from "@/lib/forms/initial-form-states";
 import {
   createRecurringTemplateAction,
-  initialCreateRecurringTemplateFormState,
   type RecurringTemplateFormLineItemValue,
 } from "@/server/actions/recurring-actions";
 

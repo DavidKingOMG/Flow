@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { writeActivityLog } from "@/lib/activity-log";
 import { assertBusinessAccess, requireActiveBusiness } from "@/lib/business-context";
 import { db } from "@/lib/db";
+import { initialCreateManualPaymentFormState } from "@/lib/forms/initial-form-states";
 import { assertBillingAccess, BillingAccessError } from "@/lib/invoices/authorization";
 import {
   PaymentAmountExceedsBalanceError,
@@ -26,19 +27,6 @@ export type CreateManualPaymentFormState = {
     recordedAt: string;
     notes: string;
   };
-};
-
-export const initialCreateManualPaymentFormState: CreateManualPaymentFormState = {
-  status: "idle",
-  message: null,
-  fieldErrors: {},
-  values: {
-    invoiceId: "",
-    amount: "",
-    method: "BANK_TRANSFER",
-    recordedAt: "",
-    notes: "",
-  },
 };
 
 function readFormDataEntry(formData: FormData, key: string): string {

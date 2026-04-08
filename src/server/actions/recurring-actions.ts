@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { writeActivityLog } from "@/lib/activity-log";
 import { assertBusinessAccess, requireActiveBusiness } from "@/lib/business-context";
 import { db } from "@/lib/db";
+import { initialCreateRecurringTemplateFormState } from "@/lib/forms/initial-form-states";
 import { assertBillingAccess, BillingAccessError } from "@/lib/invoices/authorization";
 import { getScheduleAnchor } from "@/lib/recurring/schedule";
 import {
@@ -49,25 +50,6 @@ export type CreateRecurringTemplateFormState = {
     notes: string;
     lineItems: RecurringTemplateFormLineItemValue[];
   };
-};
-
-export const initialCreateRecurringTemplateFormState: CreateRecurringTemplateFormState = {
-  status: "idle",
-  message: null,
-  fieldErrors: {},
-  values: {
-    name: "",
-    clientId: "",
-    frequency: "MONTHLY",
-    intervalCount: "1",
-    startsAt: "",
-    endsAt: "",
-    dueInDays: "0",
-    invoiceStatus: "DRAFT",
-    taxRateBps: "0",
-    notes: "",
-    lineItems: [{ description: "", quantity: "1", unitPrice: "0" }],
-  },
 };
 
 class RecurringTemplateClientNotFoundError extends Error {

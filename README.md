@@ -25,6 +25,13 @@ Flow is a secure, admin-first business dashboard for multi-client operations:
 - Unit/integration tests: `npm test`
 - E2E tests: `npm run test:e2e`
 - Lint: `npm run lint`
+- Health check: `GET /api/health`
+
+## CI
+
+GitHub Actions runs lint, tests, and production build on pushes/PRs:
+
+- [ci.yml](.github/workflows/ci.yml)
 
 ## Deployment
 

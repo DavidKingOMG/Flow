@@ -1,4 +1,4 @@
-import type { Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 
 export type CreateActivityLogInput = {
@@ -18,7 +18,7 @@ export type CreateActivityLogInput = {
     | "STRIPE_PAYMENT_FAILED";
   title: string;
   message: string;
-  metadata?: Prisma.JsonValue;
+  metadata?: Prisma.InputJsonValue | null;
 };
 
 export async function writeActivityLog(input: CreateActivityLogInput) {
@@ -33,7 +33,7 @@ export async function writeActivityLog(input: CreateActivityLogInput) {
       type: input.type,
       title: input.title,
       message: input.message,
-      metadata: input.metadata,
+      metadata: input.metadata === null ? Prisma.JsonNull : input.metadata,
     },
   });
 }

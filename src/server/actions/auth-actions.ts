@@ -1,5 +1,3 @@
-"use server";
-
 import { Prisma } from "@prisma/client";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { z } from "zod";
@@ -62,6 +60,8 @@ function rethrowRedirect(error: unknown): never | void {
 }
 
 export async function createBusinessAccount(rawInput: BusinessSignupInput) {
+  "use server";
+
   const input = businessSignupSchema.parse(rawInput);
   const email = normalizeEmail(input.email);
   const username = normalizeUsername(input.username);
@@ -152,6 +152,8 @@ export async function createBusinessAccount(rawInput: BusinessSignupInput) {
 }
 
 export async function createBusinessAccountAction(formData: FormData) {
+  "use server";
+
   const input = {
     businessName: readFormDataEntry(formData, "businessName"),
     fullName: readFormDataEntry(formData, "fullName"),
@@ -201,6 +203,8 @@ export async function createBusinessAccountAction(formData: FormData) {
 }
 
 export async function signInWithCredentialsAction(formData: FormData) {
+  "use server";
+
   const parsed = credentialActionSchema.safeParse({
     identifier: readFormDataEntry(formData, "identifier"),
     password: readFormDataEntry(formData, "password"),

@@ -1,6 +1,11 @@
 import { createBusinessAccountAction } from "@/server/actions/auth-actions";
 
 export default function SignUpPage() {
+  async function submitBusinessSignup(formData: FormData): Promise<void> {
+    "use server";
+    await createBusinessAccountAction(formData);
+  }
+
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-4xl items-center px-6 py-12 sm:px-8">
       <section className="w-full rounded-[2rem] border border-white/10 bg-slate-950/80 p-8 shadow-[0_30px_120px_rgba(0,0,0,0.45)] backdrop-blur">
@@ -11,7 +16,7 @@ export default function SignUpPage() {
           to invite the rest of your team.
         </p>
 
-        <form action={createBusinessAccountAction} className="mt-10 grid gap-5 md:grid-cols-2">
+        <form action={submitBusinessSignup} className="mt-10 grid gap-5 md:grid-cols-2">
           <label className="grid gap-2 text-sm text-slate-200 md:col-span-2">
             Business name
             <input

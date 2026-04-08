@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { assertBusinessAccess, requireActiveBusiness, type ActiveBusinessContext } from "@/lib/business-context";
+import { initialCreateClientFormState } from "@/lib/forms/initial-form-states";
 import { hashPassword } from "@/lib/password";
 import {
   createClientSchema,
@@ -46,23 +47,6 @@ export type CreateClientFormState = {
     username: string;
     password: string;
   };
-};
-
-export const initialCreateClientFormState: CreateClientFormState = {
-  status: "idle",
-  message: null,
-  fieldErrors: {},
-  conflicts: [],
-  values: {
-    fullName: "",
-    companyName: "",
-    email: "",
-    phone: "",
-    notes: "",
-    loginEnabled: false,
-    username: "",
-    password: "",
-  },
 };
 
 class DuplicateClientConflictError extends Error {

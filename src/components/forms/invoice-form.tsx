@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useActionState, useEffect, useRef, useState } from "react";
+import { initialCreateInvoiceFormState } from "@/lib/forms/initial-form-states";
 import {
   createInvoiceAction,
-  initialCreateInvoiceFormState,
   type InvoiceFormLineItemValue,
 } from "@/server/actions/invoice-actions";
 

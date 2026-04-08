@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { assertBusinessAccess, requireActiveBusiness, type ActiveBusinessContext } from "@/lib/business-context";
 import { db } from "@/lib/db";
+import { initialCreateInvoiceFormState } from "@/lib/forms/initial-form-states";
 import { assertBillingAccess, BillingAccessError } from "@/lib/invoices/authorization";
 import { calculateInvoiceTotals } from "@/lib/invoices/calculate-totals";
 import { transitionInvoiceStatus } from "@/lib/invoices/status";
@@ -47,21 +48,6 @@ export type CreateInvoiceFormState = {
     notes: string;
     lineItems: InvoiceFormLineItemValue[];
   };
-};
-
-export const initialCreateInvoiceFormState: CreateInvoiceFormState = {
-  status: "idle",
-  message: null,
-  fieldErrors: {},
-  values: {
-    clientId: "",
-    issuedAt: "",
-    dueAt: "",
-    status: "DRAFT",
-    taxRateBps: "0",
-    notes: "",
-    lineItems: [{ description: "", quantity: "1", unitPrice: "0" }],
-  },
 };
 
 class InvoiceClientNotFoundError extends Error {

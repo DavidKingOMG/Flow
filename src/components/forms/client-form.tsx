@@ -2,10 +2,8 @@
 
 import Link from "next/link";
 import { useActionState, useEffect, useState } from "react";
-import {
-  createClientAction,
-  initialCreateClientFormState,
-} from "@/server/actions/client-actions";
+import { initialCreateClientFormState } from "@/lib/forms/initial-form-states";
+import { createClientAction } from "@/server/actions/client-actions";
 
 function FieldError({ errors }: { errors?: string[] }) {
   if (!errors || errors.length === 0) {
