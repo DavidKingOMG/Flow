@@ -48,11 +48,10 @@ Create webhook endpoint in Stripe:
 
 Run before shipping:
 
-1. `npm run lint`
-2. `npm test`
-3. `npm run test:e2e`
-4. `npm run db:migrate:deploy` (production environment)
-5. Verify sign-up/sign-in, invoice creation, and payment status updates in live app.
+1. `npm run verify`
+2. `npm run test:e2e`
+3. `npm run db:migrate:deploy` (production environment)
+4. Verify sign-up/sign-in, invoice creation, and payment status updates in live app.
 
 ## 6. Operational Health Check
 
