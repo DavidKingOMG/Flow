@@ -126,7 +126,7 @@ export function ensureBusinessAccess(
 }
 
 function isDevAuthBypassEnabled(): boolean {
-  return process.env.NODE_ENV === "development" && process.env.DEV_AUTH_BYPASS !== "0";
+  return process.env.NODE_ENV === "development" && process.env.DEV_AUTH_BYPASS === "1";
 }
 
 export async function requireActiveBusiness(): Promise<ActiveBusinessContext> {
