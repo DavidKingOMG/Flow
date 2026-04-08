@@ -51,6 +51,11 @@ import {
   signInWithCredentialsAction,
 } from "@/server/actions/auth-actions";
 
+const initialAuthActionState = {
+  status: "idle" as const,
+  error: null as string | null,
+};
+
 describe("createBusinessAccount", () => {
   beforeEach(() => {
     transactionState.businessCreate.mockReset();
@@ -311,13 +316,13 @@ describe("auth foundations", () => {
     signUpFormData.set("password", "SecurePass123!");
     signUpFormData.set("phone", "5551234567");
 
-    await createBusinessAccountAction(signUpFormData);
+    await createBusinessAccountAction(initialAuthActionState, signUpFormData);
 
     const signInFormData = new FormData();
     signInFormData.set("identifier", "jamie@example.com");
     signInFormData.set("password", "SecurePass123!");
 
-    await signInWithCredentialsAction(signInFormData);
+    await signInWithCredentialsAction(initialAuthActionState, signInFormData);
 
     expect(signInMock).toHaveBeenNthCalledWith(
       1,

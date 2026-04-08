@@ -1,11 +1,6 @@
-import { signInWithCredentialsAction } from "@/server/actions/auth-actions";
+import { SignInForm } from "@/components/forms/sign-in-form";
 
 export default function SignInPage() {
-  async function submitSignIn(formData: FormData): Promise<void> {
-    "use server";
-    await signInWithCredentialsAction(formData);
-  }
-
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-3xl items-center px-6 py-12 sm:px-8">
       <section className="w-full rounded-[2rem] border border-white/10 bg-slate-950/80 p-8 shadow-[0_30px_120px_rgba(0,0,0,0.45)] backdrop-blur">
@@ -15,38 +10,7 @@ export default function SignInPage() {
           Use your email or username and password to open the Flow dashboard for your team.
         </p>
 
-        <form action={submitSignIn} className="mt-10 grid gap-5">
-          <label className="grid gap-2 text-sm text-slate-200">
-            Email or username
-            <input
-              name="identifier"
-              type="text"
-              autoComplete="username"
-              className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-base text-white outline-none transition focus:border-cyan-300/50"
-              placeholder="jamie@example.com"
-              required
-            />
-          </label>
-
-          <label className="grid gap-2 text-sm text-slate-200">
-            Password
-            <input
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-base text-white outline-none transition focus:border-cyan-300/50"
-              placeholder="Enter your password"
-              required
-            />
-          </label>
-
-          <button
-            type="submit"
-            className="mt-4 rounded-full bg-cyan-300 px-6 py-3 text-sm font-medium text-slate-950 transition hover:bg-cyan-200"
-          >
-            Sign in
-          </button>
-        </form>
+        <SignInForm />
       </section>
     </main>
   );

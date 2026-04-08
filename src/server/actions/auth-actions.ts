@@ -1,3 +1,5 @@
+"use server";
+
 import { Prisma } from "@prisma/client";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { z } from "zod";
@@ -26,6 +28,15 @@ const credentialActionSchema = z.object({
 
 export type BusinessSignupInput = z.input<typeof businessSignupSchema>;
 export type BusinessSignupResult = Awaited<ReturnType<typeof createBusinessAccount>>;
+export type AuthActionState = {
+  status: "idle" | "error";
+  error: string | null;
+};
+
+const initialAuthActionState: AuthActionState = {
+  status: "idle",
+  error: null,
+};
 
 function slugifyBusinessName(value: string): string {
   return value
@@ -60,8 +71,6 @@ function rethrowRedirect(error: unknown): never | void {
 }
 
 export async function createBusinessAccount(rawInput: BusinessSignupInput) {
-  "use server";
-
   const input = businessSignupSchema.parse(rawInput);
   const email = normalizeEmail(input.email);
   const username = normalizeUsername(input.username);
@@ -151,9 +160,10 @@ export async function createBusinessAccount(rawInput: BusinessSignupInput) {
   }
 }
 
-export async function createBusinessAccountAction(formData: FormData) {
-  "use server";
-
+export async function createBusinessAccountAction(
+  _previousState: AuthActionState,
+  formData: FormData,
+): Promise<AuthActionState> {
   const input = {
     businessName: readFormDataEntry(formData, "businessName"),
     fullName: readFormDataEntry(formData, "fullName"),
@@ -166,7 +176,7 @@ export async function createBusinessAccountAction(formData: FormData) {
   const parsed = businessSignupSchema.safeParse(input);
   if (!parsed.success) {
     return {
-      ok: false,
+      status: "error",
       error: parsed.error.issues[0]?.message ?? "Please correct the highlighted fields.",
     };
   }
@@ -177,7 +187,7 @@ export async function createBusinessAccountAction(formData: FormData) {
     result = await createBusinessAccount(parsed.data);
   } catch (error) {
     return {
-      ok: false,
+      status: "error",
       error: error instanceof Error ? error.message : "Unable to create your business account.",
     };
   }
@@ -194,17 +204,18 @@ export async function createBusinessAccountAction(formData: FormData) {
     rethrowRedirect(error);
 
     return {
-      ok: false,
+      status: "error",
       error: "Your account was created, but automatic sign-in failed. Please sign in manually.",
     };
   }
 
-  return { ok: true };
+  return initialAuthActionState;
 }
 
-export async function signInWithCredentialsAction(formData: FormData) {
-  "use server";
-
+export async function signInWithCredentialsAction(
+  _previousState: AuthActionState,
+  formData: FormData,
+): Promise<AuthActionState> {
   const parsed = credentialActionSchema.safeParse({
     identifier: readFormDataEntry(formData, "identifier"),
     password: readFormDataEntry(formData, "password"),
@@ -212,17 +223,24 @@ export async function signInWithCredentialsAction(formData: FormData) {
 
   if (!parsed.success) {
     return {
-      ok: false,
+      status: "error",
       error: parsed.error.issues[0]?.message ?? "Please provide valid sign-in credentials.",
     };
   }
 
   const { signIn } = await import("@/lib/auth");
+  try {
+    await signIn("credentials", {
+      ...parsed.data,
+      redirectTo: "/dashboard",
+    });
+  } catch (error) {
+    rethrowRedirect(error);
+    return {
+      status: "error",
+      error: "Sign-in failed. Check your email/username and password.",
+    };
+  }
 
-  await signIn("credentials", {
-    ...parsed.data,
-    redirectTo: "/dashboard",
-  });
-
-  return { ok: true };
+  return initialAuthActionState;
 }
